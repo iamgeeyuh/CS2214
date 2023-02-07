@@ -1,0 +1,28 @@
+1. (A and B and not C) or not (A and B)
+
+   |  A  |  B  |  C  |  Y  |
+   -------------------------
+   |  0  |  0  |  0  |  1  |
+   |  0  |  0  |  1  |  1  |
+   |  0  |  1  |  0  |  1  |
+   |  0  |  1  |  1  |  1  |
+   |  1  |  0  |  0  |  1  |
+   |  1  |  0  |  1  |  1  |
+   |  1  |  1  |  0  |  1  |
+   |  1  |  1  |  1  |  0  |
+
+3. a. 00100010
+   b. 11011110 
+
+4. a. 211
+   b. 8
+   c. 255
+
+5. a. -45
+   b. 8
+   c. -1
+
+6. Rufus is incorrect because i will keep doubling until it overflows. i can only hold 
+   a certain number of bits and when i's value is greater than that many bits can hold, 
+   it overflows and becomes negative. When i is negative it meets the condition to end
+   the while loop since i < 0.

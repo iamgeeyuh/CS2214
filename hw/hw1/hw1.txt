@@ -1,0 +1,36 @@
+1. |  A  |  B  |  C  |  Y  |
+   -------------------------
+   |  0  |  0  |  0  |  1  |
+   |  0  |  0  |  1  |  1  |
+   |  0  |  1  |  0  |  0  |
+   |  0  |  1  |  1  |  1  |
+   |  1  |  0  |  0  |  0  |
+   |  1  |  0  |  1  |  0  |
+   |  1  |  1  |  0  |  0  |
+   |  1  |  1  |  1  |  1  |
+
+2. A'B' + BC
+
+4. The program will not run infinitely because x is unsigned. This means that once x has decremented past 0 due to
+   the while loop, x will become a large positive value. This value is greater than 79, and since the condition
+   for breaking the while loop is when x > 79, the while loop will eventually end and thus the program will end. The 
+   program will output "x= x", with the second x being the maximum value of an unsigned. 
+
+5. a. 00110101
+   b. 11001011  
+   c. 10110011
+   d. 11110100
+
+6. a. 127
+   b. -65
+   c. -33
+   d. 85
+
+7. a. 89
+   b. -127
+   c. -10
+   d. 56
+
+8. a. 89
+   b. 129
+   c. 44
