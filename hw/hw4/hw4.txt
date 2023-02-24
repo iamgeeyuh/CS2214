@@ -1,0 +1,58 @@
+1. 0
+
+2. Rg0 will keep incrementing until it either equals Rg1 or 15. If it equals Rg1, then
+   that means its less than or equal to Rg1 since incrementing it set it equal to Rg1,
+   which suggests that it was less than Rg1 to begin with. Rg2 would be set to 1. If Rg0
+   equals 15, then Rg0 is greater than Rg1 because 15 is the greatest possible value and
+   Rg1 cannot be greater than 15. The check for Rg0 == Rg1 is set before Rg0 == 15 so 
+   that if Rg1 == 15, Rg2 will still be 1. 
+
+3. pc should be initialized as reg [9:0] so that it can store 1024 instructions since the 
+   maximum for a 10 bit binary is 1023. Including 0, this will allow pc to store 1024 
+   instructions.
+
+   zFlag remains the same because it still tracks whether or not an instruction results in
+   0.
+
+   immData should be initialized as reg [9:0] as well. This is so that when jnz, jn, or jmp 
+   are called, immData + pc can be overflowed so that the program can jump from pc = 100 to
+   pc = 5 for example and any value of pc can reach any other value of pc between 0 and 1024.
+
+   Since immData is [9:0], then r0, r1, r2, and r3 should also be [9:0]. This is so that 
+   the registers are able to store immData when addi, subi, or movi are called. 
+
+   When creating a large application it would be useful to have more than 4 registers as 
+   the program will likely have to store more than 4 values at a time. The current registers
+   are 2-bit and thus can only store registers 0 to 3. If it were 3-bit it could store 0 to 7
+   and if it were 4-bit it could store 0 to 15 and so on. The number of registers won't affect
+   the amount of instructions that E15 can store, so I will continue to use 4 2-bit registers.
+   But if more registers are needed, they can be added by adding bits to the registers. 
+
+   The instruction format will be a 4-bit opcode, 2-bit (or however many registers are needed)
+   src and dst, and 10-bit immData. If the number of registers is 4, then the instruction format
+   will be 18-bit. Doubling the number of registers will add 2 bits to the instruction format
+   each time.
+
+   Suppose the instruction format was 18-bit. Then myROM would be initialized as reg [17:0]
+   myROM [9:0]. [17:0] represents the 18-bit instruction format and [9:0] represents the 1024 
+   instruction that can be stored, or the 10-bit capacity of pc. 
+ 
+   The input and outputs for both ALU need to be changed to 10-bit. For dataALU, the registers
+   are 10-bit so the input operands also need to be 10-bit. The output is also 10-bit because it
+   will need to be stored inside a 10-bit register. For pcALU, pc is now 10-bit so the input must
+   be 10-bit. The output must also be 10-bit because the output is the new 10-bit pc.
+
+4. a. 4
+   b. 0
+   c. 5
+   d. 8
+   e. 2
+   f. 
+
+4 = 9
+1 = 0
+
+pc = 3
+$4 = 14
+
+5. j target

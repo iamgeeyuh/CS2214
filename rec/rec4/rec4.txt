@@ -1,0 +1,45 @@
+1.  A | state | B 
+   ---------------- 
+    0 |   0   | 10
+    1 |   1   | 11
+    0 |   1   | 11
+    9 |   9   |  3
+    8 |   9   |  3
+   15 |   15  |  5
+    0 |   15  |  5
+
+2. a. Moves the value in Rg3 to Rg1 and advances the program counter by 1.
+   b. Increments the value in Rg2 bt 0101 and advances the program counter by 1. If the 
+      value in Rg2 is not 0, zero flag = 0, else 1.
+   c. If the difference between the values in Rg1 and Rg3 is 0, the zero flag will return
+      1 else 0. The program counter advances by 1.
+   d. If the zero flag is 1, the program counter will increment by 0011. 
+
+3. 1) 0010 is moved to Rg0
+   2) 0100 is moved to Rg1
+   3) Rg0 is added to Rg1, or Rg1 = 0010 + 0100 = 0110
+   4) 0001 is subtracted from Rg1, or Rg1 = 0110 - 0001 = 0101
+
+   Rg0 = 0010
+   Rg1 = 0101
+
+4. a. 101000101100
+   b. 110100010110
+   c. 111100111101
+   d. 001100000010
+
+5. a. {add, Rg0, Rg1, 4'b0000}
+   b. {jmp, RXX, RXX, 4'b0110}
+   c. {sub, Rg2, Rg3, 4'b0000}
+   d. {movi, RXX, Rg2, 4'b1011}
+
+6. a. Rg0 = 0100, Rg1 = 1000
+   b. Rg0 = 0101, Rg1 = 0000
+
+7. myROM[0] = {movi, RXX, Rg3, 4'b1111} 
+   myROM[1] = {subi, RXX, Rg3, 4'b0001} 
+   myROM[2] = {cmpi, RXX, RXX, 4'b0000} 
+   myROM[3] = {jz, RXX, RXX, 4'b0010}
+   myROM[4] = {jmp, RXX, RXX, 4'b1101} 
+   myROM[5] = {jmp, RXX, RXX, 4'b0000}
+

@@ -1,0 +1,68 @@
+1. 100, 011, 110, 111, 101, 001
+
+2. a. 111010110000 
+      The program counter increments by 1. If the difference between Rg2 and Rg3 is 0, then the
+      zero counter will be 1, else 0. Essentially, this compares and checks if Rg2 and Rg3 have 
+      equal values.
+
+   b. 101000110000 
+      The program counter increments by 1. Rg3 will be set to the sum of Rg0 and Rg3. If the sum 
+      is 0, the zero flag will be 1, else 0.
+
+   c. 001000000001 
+      If the zero flag is 1, then the program counter will increment by 0001. If the zero flag is 
+      0, then the program counter will increment by 1 as usual. This allows instructions to be 
+      skipped if some previous condition made the zero flag 1.
+
+3. a. {addi, RXX, Rg1, 4'b0011} 
+      The program counter increments by 1. Rg1 will be set to the sum of Rg1 and 0011. If the sum 
+      is 0, the zero flag will be 1, else 0.
+
+   b. {add, Rg1, Rg1, 4'b0011} 
+      The program counter increments by 1. Rg1 will be set to the sum of Rg1 and Rg1. If the sum 
+      is 0, the zero flag will be 1, else 0.
+
+   c. {jmp, RXX, RXX, 4'b0000} 
+      The program counter increments by the immediate value. Since the immediate value is 0, this 
+      means that the program counter will always remain at the current instruction and the instruction 
+      will run forever.
+
+   d. {jmp, RXX, RXX, 4'b0001} 
+      The program counter increments by the immediate value, which is 1.  
+
+4. a. myROM[3]
+   b. myROM[5]
+   c. myROM[6]
+
+5. a. Cell 8 will run 225 times. At cell 5, Rg1 is set to 15. Cell 6 compares Rg1 to 0 and makes 
+      the zero flag = 1 if Rg1 == 0. Cell 7 jumps to cell 10 if zero flag = 1, ie. if Rg1 == 0.
+      Otherwise, the program counter continues to cell 8 where Rg1 is decremented by 1. Cell 9 
+      jumps the program counter back to cell 6. This loop of cell 6 to cell 9 and back will keep
+      running until Rg1 == 0 and the program can jump to cell 10 from cell 7. Since cell 8 
+      decrements Rg1 by 1, it will take cell 8 15 executions before Rg1 == 0. At cell 10 Rg0, which
+      is set to 15, is decremented by 1. At cell 11, the program jumps to cell 3 where it is checked 
+      if Rg0 == 0. If not. then cell 4's jz will not execute and at cell 5, Rg1 is set to 15. The 
+      loop involving Rg1 will run again and will keep running until Rg0 == 0. Since Rg0 = 15 and 
+      decrements by 1 for each loop of Rg1, cell 8 will run 15 times for each of the 15 loops of 
+      Rg0. Therefore cell 8 will execute 15 * 15 = 225 times.
+
+   b. Cell 10 will run 15 times. At cell 2, Rg0 is set to 15. Cell 3 compares Rg1 to 0 and makes 
+      the zero flag = 1 if Rg1 == 0. Cell 4 jumps to cell 1 if zero flag = 1, ie. if Rg1 == 0.
+      Otherwise, the program continues to cell 5 where Rg1 is set to 15 and a loop from cell 6 to
+      cell 9 is initiated. When the loop completes, the program ends up on cell 10. At cell 10, Rg0
+      is decremented by 1 and at cell 11, the program counter jumps to cell 3. Thus cell 3 to cell
+      11 runs until Rg0 == 0 and cell 4 is able to jump to cell 1. Since between cell 3 and cell 11 
+      only cell 10 decrements Rg0 and only decrements by 1, cell 10 will need to run 15 times before
+      Rg0 == 0. When cell Rg0 == 0, cell 4 will jump to cell 1. Cell 1 continuously jumps to itself
+      indefinitely so cell 10 will no longer execute. 
+
+   c. Cell 12 never executes. Cell 11 jumps to cell 3 and no other cell jumps to cell 12.
+
+   d. Cell 1 keeps adding 0 to the program counter which means it constantly executes cell 1 over 
+      and over again. Therefore cell 1 keeps executing indefinitely.
+      
+   e. The program is a loop within a loop. The outer loop runs 15 times and the inner loop also runs 
+      15 times. Therefore it runs 15*15 or 225 times in total. 
+
+7. I created a loop that runs Rg0 times. In each loop, I add Rg1 to Rg2. I essentially add Rg1 to Rg2
+   Rg0 times, which is the same as multiplicaton. 

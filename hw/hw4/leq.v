@@ -1,0 +1,12 @@
+myROM[0] = {movi, RXX, Rg0, 4'b0000};
+myROM[1] = {movi, RXX, Rg1, 4'b1111};
+myROM[2] = {cmp, Rg0, Rg1, 4'b0000};
+myROM[3] = {jz, RXX, RXX, 4'b0111};
+myROM[4] = {cmpi, RXX, Rg0, 4'b1111};
+myROM[5] = {jz, RXX, RXX, 4'b0011};
+myROM[6] = {addi, RXX, Rg0, 4'b0001};
+myROM[7] = {jmp, RXX, RXX, 4'b1011};
+myROM[8] = {movi, RXX, Rg2, 4'b0000};
+myROM[9] = {jmp, RXX, RXX, 4'b0000};
+myROM[10] = {movi, RXX, Rg2, 4'b0001};
+myROM[11] = {jmp, RXX, RXX, 4'b0000};
