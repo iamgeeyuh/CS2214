@@ -4,7 +4,10 @@
 
 7. (x & 7) | ((x & 7) << 3) | ((x & 7) << 6)
 
-8. x & 
+8. (x & 288) == (9U << 5)
 
-
-
+9. Rupert is incorrect. Suppose you have x = 4 and y = 3. Then x && y is 1 because x 
+   and y are nonzero. Thus they are true and (true && true) results in true, or 1. 
+   However x & y would result in 0 since x = 3'b100 and y = 3'b011. 101 & 011 results
+   in 0. This shows that && and & are not interchangeable because they result in 
+   different answers for the same expression.
