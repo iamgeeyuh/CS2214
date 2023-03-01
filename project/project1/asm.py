@@ -125,8 +125,8 @@ def output_machine(code):
     """
     Prints formatted machine code instructions.
 
-    This function takes a list of machine code instructions as input and prints them to the console. Each instruction is 
-    printed starting with the index of the instruction in the RAM followed by its 16-bit binary representation. The function 
+    This function takes a list of machine code instructions as input and prints them to the console. Each instruction is
+    printed starting with the index of the instruction in the RAM followed by its 16-bit binary representation. The function
     does not return anything.
 
     Parameters
@@ -134,20 +134,11 @@ def output_machine(code):
     code: list
         A list of machine code instructions.
     """
-    instructions = []
     for i in range(len(code)):
         # ram[i] = 16'b code[i] ;
-        # print("ram[{}] = 16'b{};".format(i, code[i]))
-        instructions.append("ram[{}] = 16'b{};".format(i, code[i]))
-    return instructions
+        print("ram[{}] = 16'b{};".format(i, code[i]))
 
-def check(instructions):
-    test = open("test.txt", 'r')
-    i = 0
-    for line in test:
-        end = line.find(";")
-        print(instructions[i], instructions[i] == line[2:end+1])
-        i += 1
+
 def main():
     """
     Converts assembly code to machine code and outputs it to the console.
@@ -158,8 +149,8 @@ def main():
     """
     assembly = extract_code()
     machine = assembly_to_machine(assembly)
-    instructions = output_machine(machine)
-    check(instructions)
+    output_machine(machine)
+
 
 if __name__ == "__main__":
     main()
