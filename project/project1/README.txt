@@ -11,11 +11,11 @@ because they had the same input and output formula. I did the same for other col
 with similar formats like 'lw' and 'sw', 'slti' and 'addi', etc. As I parsed through a list of assembly 
 instructions, the instructions would be passed through one of the converter functions based on the opcode 
 in the instruction. For example, if the opcode was 'add' or 'sub' I would pass the instructions through
- add_sub_etc() but if the opcode was 'jal' I'd pass the instructions through jal_j(). Each converter 
- function returned the corresponding machine code which would be added to a list of translated machine code 
- that would be outputted to the terminal.
+add_sub_etc() but if the opcode was 'jal' I'd pass the instructions through jal_j(). Each converter 
+function returned the corresponding machine code which would be added to a list of translated machine code 
+that would be outputted to the terminal.
 
 I feel that this design cut back on a lot of redundancy. By using one function for multiple opcodes that 
 are essentially the same, I am cutting a lot of repetitive code. Having separate functions for each collection 
 of opcodes also makes the code more readable to me as I can easily find the function associated with an opcode 
-and there is less code to read. 
+and it will be easier to maintain in the future. 

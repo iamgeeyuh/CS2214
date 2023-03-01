@@ -22,7 +22,10 @@ def extract_code():
     # filters and isolates the assembly code
     for line in input_file:
         if line[0] != "#" and line != "\n":
-            line = line[: line.find("#")]
+            # gets rid of comments
+            if line.find("#") != -1:
+                line = line[: line.find("#")]
+            # gets rid of whitespace
             line = line.lstrip().rstrip()
             contents.append(line)
     input_file.close()
