@@ -32,6 +32,7 @@ def add_sub_etc(opcode, arguments):
     dst = int(arguments[0][1])
     srcA = int(arguments[1][1])
     srcB = int(arguments[2][1])
+    # decode = srcA, srcB, dst, opcode
     decode += (dst << 4) + (srcB << 7) + (srcA << 10)
     return format(decode, "016b")
 
@@ -71,6 +72,7 @@ def lw_sw(opcode, arguments, labels):
     # checks if imm is a label
     if imm in labels:
         imm = labels[imm]
+    # decode = opcode, addr, reg, imm
     decode += (int(imm)) + (reg << 7) + (addr << 10)
     return format(decode, "016b")
 
@@ -109,7 +111,11 @@ def slti_addi(opcode, arguments, labels):
     # checks if imm is a label
     if imm in labels:
         imm = labels[imm]
-    decode += (int(imm)) + (dst << 7) + (src << 10)
+    imm = int(imm)
+    # decode = opcode, src, dst, imm
+    decode = decode | abs(imm) | (dst << 7) | (src << 10)
+    000010
+    111110
     return format(decode, "016b")
 
 
@@ -143,6 +149,7 @@ def jeq(arguments, labels, pc):
     if imm in labels:
         imm = labels[imm]
     rel_imm = int(imm) - pc - 1
+    # decode = opcode, regA, regB, rel_imm
     decode = (rel_imm) + (regB << 7) + (regA << 10) + (0b110 << 13)
     return format(decode, "016b")
 
@@ -166,6 +173,7 @@ def jr(arguments):
         The machine code representation of the instruction.
     """
     reg = int(arguments[0][1])
+    # decode = reg, opcode
     decode = (reg << 10) + 0b1000
     return format(decode, "016b")
 
@@ -203,6 +211,7 @@ def jal_j(opcode, arguments, labels):
     # checks if imm is a label
     if imm in labels:
         imm = labels[imm]
+    # decode = opcode, imm
     decode += int(imm)
     return format(decode, "016b")
 
@@ -227,6 +236,7 @@ def movi(arguments, labels):
     str
         The machine code representation of the instruction.
     """
+    # movi reg, imm = addi reg, $0, imm
     dst = arguments[0]
     src = "$0"
     imm = arguments[1]
@@ -257,4 +267,5 @@ def fill(arguments, labels):
     # checks if imm is a label
     if imm in labels:
         imm = labels[imm]
+    # decode = imm
     return format(int(imm), "016b")

@@ -17,15 +17,15 @@ def extract_code():
         A list of assembly instructions extracted from the specified file.
     """
     filename = sys.argv[1]
-    file = open(filename, "r")
+    input_file = open(filename, "r")
     contents = []
     # filters and isolates the assembly code
-    for line in file:
+    for line in input_file:
         if line[0] != "#" and line != "\n":
             line = line[: line.find("#")]
             line = line.lstrip().rstrip()
             contents.append(line)
-    file.close()
+    input_file.close()
     return contents
 
 
@@ -59,9 +59,9 @@ def assembly_to_machine(assembly):
             # cut label out of instruction
             assembly[i] = assembly[i][assembly[i].find(":") + 1 :].lstrip()
         # separate opcode and argument
-        line = assembly[i].split()
-        opcode = line[0]
-        arguments = "".join(line[1:]).split(",")
+        instructions = assembly[i].split()
+        opcode = instructions[0]
+        arguments = "".join(instructions[1:]).split(",")
         # use converters function based on opcode
         if opcode in ["add", "sub", "or", "and", "slt"]:
             machine.append(converters.add_sub_etc(opcode, arguments))
@@ -78,8 +78,10 @@ def assembly_to_machine(assembly):
         elif opcode == "movi":
             machine.append(converters.movi(arguments, labels))
         elif opcode == "nop":
+            # nop = add $0, $0, $0
             machine.append(converters.add_sub_etc("add", ["$0", "$0", "$0"]))
         elif opcode == "halt":
+            # halt = j pc
             machine.append(converters.jal_j("j", [pc], labels))
         elif opcode == ".fill":
             machine.append(converters.fill(arguments, labels))
@@ -111,7 +113,9 @@ def find_labels(assembly):
     # offset accounts for labels that aren't on the same line as an instruction
     for i in range(len(assembly)):
         if assembly[i].find(":") != -1:
+            # address of a label is its index - offset
             labels[assembly[i][: assembly[i].find(":")]] = i - offset
+            # offset increments when a label is found on its own line
             if assembly[i][-1] == ":":
                 offset += 1
     return labels
@@ -130,10 +134,20 @@ def output_machine(code):
     code: list
         A list of machine code instructions.
     """
+    instructions = []
     for i in range(len(code)):
-        print("ram[{}] = 16'b{};".format(i, code[i]))
+        # ram[i] = 16'b code[i] ;
+        # print("ram[{}] = 16'b{};".format(i, code[i]))
+        instructions.append("ram[{}] = 16'b{};".format(i, code[i]))
+    return instructions
 
-
+def check(instructions):
+    test = open("test.txt", 'r')
+    i = 0
+    for line in test:
+        end = line.find(";")
+        print(instructions[i], instructions[i] == line[2:end+1])
+        i += 1
 def main():
     """
     Converts assembly code to machine code and outputs it to the console.
@@ -144,8 +158,8 @@ def main():
     """
     assembly = extract_code()
     machine = assembly_to_machine(assembly)
-    output_machine(machine)
-
+    instructions = output_machine(machine)
+    check(instructions)
 
 if __name__ == "__main__":
     main()
