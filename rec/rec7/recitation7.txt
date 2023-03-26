@@ -1,0 +1,30 @@
+1. A multiplexer is like an if statement because their outputs depend on their inputs. 
+   If statements only have true or false as inputs while multiplexers can have more.
+
+2. 7bit imm must be sign extended to match the program counter so that imm can be added to the program counter.
+   jeq uses the sign-extend operation.
+
+3. During jeq FUNCalu would equal 1 because 1 represents subtract. jeq compares two values and the way to values 
+   are compared is by checking if their difference is equal to 0.
+   j doesn't use FUNCalu.
+
+4. a. FUNCalu = 0, MUXalu = 1, MUXpc = 1, MUXrf = 0, MUXgt = 0, MUXdst = 0, WErf = 1, WEmem = 0 
+   b. FUNCalu = 0, MUXalu = 0, MUXpc = 0, MUXrf = 0, MUXgt = DC, MUXdst = DC, WErf = 0, WEmem = 0 
+   c. FUNCalu = 0, MUXalu = 1, MUXpc = 1, MUXrf = 0, MUXgt = 2, MUXdst = 0, WErf = 1, WEmem = 0 
+
+5. Since MUXpc = 3, the instruction has a 13bit imm. This leaves j and jal. Since WErf is off it must be j because
+   jal writes to the register.
+
+6. Since MUXpc = 3, the instruction has a 13bit imm. This leaves j and jal. Since WErf is on it must be jal because
+   jal writes to the register.
+
+7. The instruction at address 6 is stored into $2. 128 is added to $2 so address 6 = 8618 + 128 = 8746 = 001 000 100 0101010.
+   This instruction at address 6 = addi $4, $0, 42 so 42 is added to $4.
+
+8. movi $1,10        
+beginning:
+   jeq $1, $0,done     
+   addi $1, $1,-1      
+   j beginning        
+done: halt                
+

@@ -30,7 +30,7 @@ module E15Process(input clk);
    initial
      begin
 
-        `include "multiplier.v"   // load the program
+        `include "loop.v"   // load the program
         
         pc = 4'b0000;           // initialize the program counter
         

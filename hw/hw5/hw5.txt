@@ -1,0 +1,32 @@
+1. lw $1, load($0)
+   sw $1, store($0)
+   halt
+   load:
+      .fill 1099
+   store:
+      .fill 456
+
+2. Since swi stores a 7bit imm into a memory address, a wire must be placed from sign-extend-7 to dataIn in memory. Now dataIn has 2 inputs from sign-extend-7 and SRC1dataOut so a MUXnew must be added to determine whether SRC1dataOut or sign-extend-7 should be inputted into dataIn. A control wire into the MUXnew will determine which input is selected. If the control wire inputs 0, the MUXnew will choose sign-extend-7. If the control wire inputs 1, the MUXnew will choose SRC1dataOut. 
+
+FUNCalu = 0
+MUXalu = 0
+MUXpc = 1
+MUXrf = 0
+MUXtgt = DC
+MUXdst = DC
+WErf = 0
+WEdmem = 1
+MUXnew = 0
+
+3. Computer B will run faster. Computer A runs 5/4 = 1.25. Computer B runs 3/2 = 1.5. Therefore computer B runs 1.5/1.25 or 20% faster. 
+
+4. jmpm loads the value of the memory address calculated by the sum of imm and reg and jumps to the loaded value in pc. The loaded value will come from dataOut of memory and needs to go to MUXpcIncr in order to for the value to be used in pc. Therefore a wire must be added between dataOut and MUXpcIncr, MUXpcIncr = 2 means dataOut has been selected.
+
+IF: 0
+ID: MUXr1 = 4
+    WEa = 1
+EXEC: 3  
+MEM: 5
+WB: MUXpcIncr = 2
+    WEpc = 1
+    MUXpc = 1
