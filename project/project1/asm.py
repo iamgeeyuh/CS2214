@@ -60,7 +60,7 @@ def assembly_to_machine(assembly):
             if assembly[i][-1] == ":":
                 continue
             # cut label out of instruction
-            assembly[i] = assembly[i][assembly[i].find(":") + 1 :].lstrip()
+            assembly[i] = assembly[i][assembly[i].rfind(":") + 1 :].lstrip()
         # separate opcode and argument
         instructions = assembly[i].split()
         opcode = instructions[0]
@@ -116,8 +116,11 @@ def find_labels(assembly):
     # offset accounts for labels that aren't on the same line as an instruction
     for i in range(len(assembly)):
         if assembly[i].find(":") != -1:
-            # address of a label is its index - offset
-            labels[assembly[i][: assembly[i].find(":")]] = i - offset
+            # list of labels
+            found_labels = assembly[i][:assembly[i].rfind(":") + 1].split()
+            for label in found_labels:
+                # address of a label is its index - offset
+                labels[label[:-1].lower()] = i - offset
             # offset increments when a label is found on its own line
             if assembly[i][-1] == ":":
                 offset += 1
