@@ -8,65 +8,61 @@ using namespace std;
 
 uint16_t ram[8192];
 uint16_t pc = 0;
-
-const uint16_t r0 = 0;
-uint16_t r1 = 0;
-uint16_t r2 = 0;
-uint16_t r3 = 0;
-uint16_t r4 = 0;
-uint16_t r5 = 0;
-uint16_t r6 = 0;
-uint16_t r7 = 0;
+uint16_t reg[8] = {0};
 
 // opcode values
 
-int op_add = 0;
-int op_sub = 1;
-int op_or = 2;
-int op_and = 3;
-int op_slt = 4;
-int op_jr = 5;
+const int op_add = 0;
+const int op_sub = 1;
+const int op_or = 2;
+const int op_and = 3;
+const int op_slt = 4;
+const int op_jr = 5;
 
-int op_slti = 6;
-int op_lw = 7;
-int op_sw = 8;
-int op_jeq = 9;
-int op_addi = 10;
+const int op_slti = 6;
+const int op_lw = 7;
+const int op_sw = 8;
+const int op_jeq = 9;
+const int op_addi = 10;
 
-int op_j = 11;
-int op_jal = 12;
+const int op_j = 11;
+const int op_jal = 12;
 
-int op_fill = 13;
-
-int op_none = 14;
+const int op_none = 13;
 
 // arguments
 
-int rgA; // also rgSrc, rgAddr, reg
+int rgA;
 int rgB;
 int rgDst;
 int imm;
 
 void load_code(string filename);
-int opcode(uint16_t code);
+int decode(uint16_t code);
+int execute(int op);
 
 int main(int argc, char *argv[])
 {
     bool halt = false;
     int op;
     uint16_t code;
+    int mem;
+    int pc_inc;
+
     load_code(argv[1]);
+
     while (!halt)
     {
-        
-        code = ram[pc & 0b1111111111111];
-        op = opcode(code);
-        if (op == op_j && (code & 0b1111111111111) == imm)
+        mem = pc & 0b1111111111111;
+        code = ram[mem];
+        op = decode(code);
+        if (op == op_j && mem == imm)
         {
             halt = true;
         }
+        pc_inc = execute(op);
         cout << code << endl;
-        pc++;
+        pc += pc_inc;
     }
 }
 
@@ -88,7 +84,7 @@ void load_code(string filename)
     }
 }
 
-int opcode(uint16_t code)
+int decode(uint16_t code)
 {
     imm = code & 0b1111111;
     rgB = (code >> 7) & 0b111;
@@ -98,8 +94,6 @@ int opcode(uint16_t code)
     // opcode in least sig 4 bits
     case (0):
         rgDst = (code >> 4) & 0b111;
-        rgB = (code >> 7) & 0b111;
-        rgA = (code >> 10) & 0b111;
         switch (code & 0b1111)
         {
         case (0):
@@ -138,4 +132,40 @@ int opcode(uint16_t code)
     }
 
     return op_none;
+}
+
+int execute(int op)
+{
+    switch (op)
+    {
+    case (op_add):
+        if (rgDst != 0)
+        {
+            reg[rgDst] = reg[rgA] + reg[rgB];
+        }
+    case (op_sub):
+        if (rgDst != 0)
+        {
+            reg[rgDst] = reg[rgA] - reg[rgB];
+        }
+    case (op_or):
+        if (rgDst != 0)
+        {
+            reg[rgDst] = reg[rgA] | reg[rgB];
+        }
+    case (op_and):
+        if (rgDst != 0)
+        {
+            reg[rgDst] = reg[rgA] & reg[rgB];
+        }
+    case (op_slt):
+        if (rgDst != 0)
+        {
+            reg[rgDst] = reg[rgA] < reg[rgB];
+        }
+    case (op_jr):
+        return (reg[rgA]);
+    }
+
+    return 1;
 }
