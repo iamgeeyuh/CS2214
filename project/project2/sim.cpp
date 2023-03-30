@@ -174,7 +174,8 @@ int execute(int op)
         }
         break;
     case (op_jr):
-        return (reg[rgA]);
+        pc = (reg[rgA]);
+        return 0;
     case (op_slti):
         if (rgB != 0)
         {
@@ -216,10 +217,10 @@ void output()
 {
     int pc_output = 0;
     cout << "Final state:" << endl;
-    cout << "    pc=    " << pc << endl;
+    cout << "\tpc=" << setw(5) << setfill(' ') << pc << endl;
     for (int i = 0; i < 8; i++)
     {
-        cout << "    $" << i << "=    " << reg[i] << endl;
+        cout << "\t$" << i << "=" << setw(5) << setfill(' ') << reg[i] << endl;
     }
     for (int i = 0; i < 16; i++)
     {
