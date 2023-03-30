@@ -61,7 +61,6 @@ int main(int argc, char *argv[])
             halt = true;
         }
         pc_inc = execute(op);
-        cout << code << endl;
         pc += pc_inc;
     }
 }
@@ -165,6 +164,8 @@ int execute(int op)
         }
     case (op_jr):
         return (reg[rgA]);
+    case (op_slti):
+        
     }
 
     return 1;
