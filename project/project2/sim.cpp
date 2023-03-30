@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <bitset>
+#include <iomanip>
 using namespace std;
 
 // initial RAM, PC, and registers
@@ -34,12 +35,13 @@ const int op_none = 13;
 
 int rgA;
 int rgB;
-int rgDst;
-int imm;
+int rgC;
+uint16_t imm;
 
 void load_code(string filename);
 int decode(uint16_t code);
 int execute(int op);
+void output();
 
 int main(int argc, char *argv[])
 {
@@ -50,7 +52,6 @@ int main(int argc, char *argv[])
     int pc_inc;
 
     load_code(argv[1]);
-
     while (!halt)
     {
         mem = pc & 0b1111111111111;
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
         pc_inc = execute(op);
         pc += pc_inc;
     }
+    output();
 }
 
 void load_code(string filename)
@@ -86,13 +88,17 @@ void load_code(string filename)
 int decode(uint16_t code)
 {
     imm = code & 0b1111111;
+    if (imm & 0b1000000)
+    {
+        imm = imm | 0b1111111110000000;
+    }
     rgB = (code >> 7) & 0b111;
     rgA = (code >> 10) & 0b111;
     switch ((code >> 13) & 0b111)
     {
     // opcode in least sig 4 bits
     case (0):
-        rgDst = (code >> 4) & 0b111;
+        rgC = (code >> 4) & 0b111;
         switch (code & 0b1111)
         {
         case (0):
@@ -138,35 +144,90 @@ int execute(int op)
     switch (op)
     {
     case (op_add):
-        if (rgDst != 0)
+        if (rgC != 0)
         {
-            reg[rgDst] = reg[rgA] + reg[rgB];
+            reg[rgC] = reg[rgA] + reg[rgB];
         }
+        break;
     case (op_sub):
-        if (rgDst != 0)
+        if (rgC != 0)
         {
-            reg[rgDst] = reg[rgA] - reg[rgB];
+            reg[rgC] = reg[rgA] - reg[rgB];
         }
+        break;
     case (op_or):
-        if (rgDst != 0)
+        if (rgC != 0)
         {
-            reg[rgDst] = reg[rgA] | reg[rgB];
+            reg[rgC] = reg[rgA] | reg[rgB];
         }
+        break;
     case (op_and):
-        if (rgDst != 0)
+        if (rgC != 0)
         {
-            reg[rgDst] = reg[rgA] & reg[rgB];
+            reg[rgC] = reg[rgA] & reg[rgB];
         }
+        break;
     case (op_slt):
-        if (rgDst != 0)
+        if (rgC != 0)
         {
-            reg[rgDst] = reg[rgA] < reg[rgB];
+            reg[rgC] = reg[rgA] < reg[rgB];
         }
+        break;
     case (op_jr):
         return (reg[rgA]);
     case (op_slti):
-        
+        if (rgB != 0)
+        {
+            reg[rgB] = reg[rgA] < imm;
+        }
+        break;
+    case (op_lw):
+        if (rgB != 0)
+        {
+            reg[rgB] = ram[reg[rgA] + imm];
+        }
+        break;
+    case (op_sw):
+        ram[imm + reg[rgA]] = reg[rgB];
+    case (op_jeq):
+        if (reg[rgA] == reg[rgB])
+        {
+            return (imm + 1);
+        }
+        break;
+    case (op_addi):
+        if (rgB != 0)
+        {
+            reg[rgB] = imm + reg[rgA];
+        }
+        break;
+    case (op_j):
+        pc = imm;
+        return 0;
+    case (op_jal):
+        reg[7] = pc + 1;
+        pc = imm;
+        return 0;
     }
-
     return 1;
+}
+
+void output()
+{
+    int pc_output = 0;
+    cout << "Final state:" << endl;
+    cout << "    pc=    " << pc << endl;
+    for (int i = 0; i < 8; i++)
+    {
+        cout << "    $" << i << "=    " << reg[i] << endl;
+    }
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            cout << hex << setw(4) << setfill('0') << ram[pc_output] << " ";
+            pc_output++;
+        }
+        cout << endl;
+    }
 }
