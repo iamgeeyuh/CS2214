@@ -164,6 +164,7 @@ int decode(uint16_t code)
     case (7):
         return op_slti;
     }
+    return -1;
 }
 
 /**
