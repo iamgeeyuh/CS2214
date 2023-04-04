@@ -225,11 +225,11 @@ int execute(int op)
     case (op_lw):
         if (rgB != 0)
         {
-            reg[rgB] = ram[reg[rgA] + imm];
+            reg[rgB] = ram[(reg[rgA] + imm) & 0b1111111111111];
         }
         break;
     case (op_sw):
-        ram[imm + reg[rgA]] = reg[rgB];
+        ram[(imm + reg[rgA]) & 0b1111111111111] = reg[rgB];
         break;
     case (op_jeq):
         if (reg[rgA] == reg[rgB])
