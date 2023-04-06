@@ -1,0 +1,63 @@
+2. 42
+   The program would load 8618 into $1 and 16388 into $2 and store the sum, 25006, into $3. Since there is no halt, the next two instructions will be 8618, or 0010000110101010, and 16388, or 0100000000000100. These translate to addi $3, $0, 42 and j 4. So $3 = 42 and j 4 is a halt.
+
+3. a. 20
+   b. 80 cycles
+   c. 0.00008 seconds
+
+4. a. c, b, $2
+      c, a, $1
+      e, d, $3
+   
+   b.  Time | IF | ID | EX | MEM | WB
+      --------------------------------
+         1  | a  |    |    |     | 
+         2  | b  | a  |    |     | 
+         3  | c  | b  | a  |     | 
+         4  | c  |nop | b  |  a  | 
+         5  | c  |nop |nop |  b  | a   
+         6  | c  |nop |nop | nop | b   
+         7  | d  | c  |nop | nop |nop     
+         8  | e  | d  | c  | nop |nop
+         9  | e  |nop | d  |  c  |nop
+        10  | e  |nop |nop |  d  | c   
+        11  | e  |nop |nop | nop | d   
+        12  |    | e  |nop | nop |nop     
+        13  |    |    | e  | nop |nop
+        14  |    |    |    |  e  |nop
+        15  |    |    |    |     | e
+           
+   c. movi $1, 0          # instr a
+      lw $2, grade1($0)   # instr b
+      lw $3, grade2($0)   # instr d
+      add $1, $1, $2      # instr c
+      add $1, $0, $3      # instr e
+
+   d.  Time | IF | ID | EX | MEM | WB
+      --------------------------------
+         1  | a  |    |    |     | 
+         2  | b  | a  |    |     | 
+         3  | d  | b  | a  |     | 
+         4  | c  | d  | b  |  a  | 
+         5  | c  |nop | d  |  b  | a   
+         6  | c  |nop |nop |  d  | b   
+         7  | e  | c  |nop | nop | d    
+         8  |    | e  | c  | nop |nop  
+         9  |    |    | e  |  c  |nop 
+        10  |    |    |    |  e  | c
+        11  |    |    |    |     | e
+  
+5. a. 2.5 GHz
+   b. 1.22 GHz
+
+6. a. 30
+      jeq $2, $0, done jumps only when $2 is 0. $2 stores 0 when $1 is 6. Since $1 increments by one in each loop, jeq $2 will have mispredicted 5 times before $1 stores 6 and $2 stores 0. That's a total of 15 cycles.
+      jeq $5, $0, next jumps when $5 is 0. Since $5 is sum of $7 and $2 and $7 and $2 are always positive values greater than 0 whos sum don't overload, $5 will never be 0. Therefore in the 5 loops it takes for jeq $2, $0, done to jump over jeq $5, jeq $2 will have mispredicted 5 times. That's a total of 15 cycles.
+      In total that's 30 cycles.
+
+   b. 3
+      For every misprediction from part a, part b predicts correctly and vice versa. Thereofore the only mispredict is the last jeq that jumps instead of going to the subsequent instruction. So the total is 3 cycles.
+
+   c. 3
+      Since the first prediction will be branch not taken, it will have the same mispredictions as part b until the first jeq jump. Since the first jeq jump is also the last jeq, there is only one misprediction. So the total is 3 cycles.
+
