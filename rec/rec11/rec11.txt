@@ -1,0 +1,41 @@
+1. Write-through policy updates the cache and then immediately updates the main memory. This is inefficient but reliable because the data will always be up-to-date between the cache and main memory but will require two memory access operations per write operation. Write-back policy only updates the cache during a write operation then updates the main memory with the missing data from the cache when the cache is replaced. This is faster than write-through but leads to inconsistent data between the cache and main memory.
+
+2. Upon a write-miss, write-around will write the data directly in main memory while write-allocate will write the data in cache. Write-around is useful for data that will likely not be used again while write-allocate is uesful for data that will be frequently used and thus would benefit from being in the cache.
+
+3. fully associative cache with block size 1
+
+4. Index = 0 
+   Tag = 0
+
+   lw $1, 0($0)
+   lw $1, 8($0)
+   lw $1, 16($0)
+   halt
+
+5. a. 256
+   b. 344
+
+6. Address = 1
+   L1 L2
+   Block id = 0 Block id = 0
+   Index = 0 Index = 0
+   Tag = 0 Tag = 0
+   
+   Address = 3
+   L1 L2
+   Block id = 1 Block id = 0
+   Index = 1 Index = 0
+   Tag = 0 Tag = 0
+   
+   lw $1, 1($0)
+   lw $2, 3($0)
+
+7. a. 2^12
+   b. 9 
+   c. 23 
+   d. 2^11
+   e. 11 
+   f. 12 
+   g. 2^9
+   h. 9 
+   i. 14

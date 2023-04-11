@@ -1,9 +1,9 @@
 2. 42
    The program would load 8618 into $1 and 16388 into $2 and store the sum, 25006, into $3. Since there is no halt, the next two instructions will be 8618, or 0010000110101010, and 16388, or 0100000000000100. These translate to addi $3, $0, 42 and j 4. So $3 = 42 and j 4 is a halt.
 
-3. a. 20
-   b. 80 cycles
-   c. 0.00008 seconds
+3. a. 15
+   b. 60 cycles
+   c. 0.00006 seconds
 
 4. a. c, b, $2
       c, a, $1
@@ -48,16 +48,25 @@
         11  |    |    |    |     | e
   
 5. a. 2.5 GHz
-   b. 1.22 GHz
+   b. 4 GHz
 
-6. a. 30
-      jeq $2, $0, done jumps only when $2 is 0. $2 stores 0 when $1 is 6. Since $1 increments by one in each loop, jeq $2 will have mispredicted 5 times before $1 stores 6 and $2 stores 0. That's a total of 15 cycles.
-      jeq $5, $0, next jumps when $5 is 0. Since $5 is sum of $7 and $2 and $7 and $2 are always positive values greater than 0 whos sum don't overload, $5 will never be 0. Therefore in the 5 loops it takes for jeq $2, $0, done to jump over jeq $5, jeq $2 will have mispredicted 5 times. That's a total of 15 cycles.
-      In total that's 30 cycles.
+6. The jeqs will activate like 
+   f
+   f
+   f
+   t
+   f
+   f
+   f
+   t
+   f
+   t
+   t
+   where f means the jeq uses subsequent instruction and t means jeq uses target instruction.
 
-   b. 3
-      For every misprediction from part a, part b predicts correctly and vice versa. Thereofore the only mispredict is the last jeq that jumps instead of going to the subsequent instruction. So the total is 3 cycles.
+   a. There are 7 instructions where jeq uses subsequesnt instructions, meaning there are 7 mispredictions for a total of 21 cycles.
 
-   c. 3
-      Since the first prediction will be branch not taken, it will have the same mispredictions as part b until the first jeq jump. Since the first jeq jump is also the last jeq, there is only one misprediction. So the total is 3 cycles.
+   b. There are 4 instructions where jeq uses target instructions, meaning there are 4 mispredictions for a total of 12 cycles.
+
+   c. It begins by predicting subsequent instruction. Since the first 3 are subsequent, there are no mispredictions. The 4th resolution is target, so there is one misprediction. From here it will predict target. Since the 5th resolution is subsequent, there is another misprediction and from here it will predict subsequent. The next two resolutions are subsequent. Then the 8th resolution is target so there is a misprediction and the following predictions will be target. The next resolution will be subsquent so there's another misprediction and the next predictions will be subsequent. In total there were 4 mispredictions for 12 cycles.
 
