@@ -1,0 +1,35 @@
+1. A page table is a data structure used to map virutal addresses to physical addresses.
+
+2. Each physical address has a range of virtual addresses that it can be mapped to. This allows more instructions to be stored than there is available computer memory.
+
+3. TLB is a cache that stores virtual address translations. When a virtual address is accessed, it first checks if the virtual address is already in the TLB. If so, the retrieving the virtual address from the TLB is fast. If not, then it will store the recieved virtual address in the TLB for future accesses. It's necessary because using a cache makes accessing virtual addresses much faster than going to the page table.
+
+4. a. 22 bits
+   b. 35 bits
+   c. 2^18 pages
+   d. 18 bits
+   e. 2^13 pages
+   f. 13 bits
+   g. 2^18
+   h. 524,288 bytes
+
+5.  virtual address | virtual page | offset | physical page | physical address
+   ----------------------------------------------------------------------------
+           41       |       5      |    1   |       10      |        81
+           26       |       3      |    2   |        5      |        42
+           15       |       1      |    7   |        7      |   63 read-only
+           59       |       7      |    3   |        6      |        51
+            3       |       0      |    3   |        2      |        19
+           48       |       6      |    0   |        8      |        64
+           34       |       4      |    2   |           page fault
+
+
+6.  virtual address | virtual page | offset | hit/miss | physical page | physical address
+   ---------------------------------------------------------------------------------------
+            9       |       2      |    1   |    hit   |       18      |        73
+           72       |      18      |    0   |    miss  |        -      |         -
+           26       |       6      |    2   |    hit   |        4      |        18
+           17       |       4      |    1   |    miss  |        -      |         - 
+           48       |      12      |    0   |    hit   |       12      |        48
+           74       |      18      |    2   |    hit   |        -      |         -
+
