@@ -3,7 +3,7 @@ main:
 loop:
     lw $3, 0($2)            # $3 = curr.val
     add $1, $1, $3          # $1 += $3
-    addi $2, $2, 1          # $2 = next
+    addi $2, 1              # $2 = next
     lw $4, 0($2)            # $4 = next.val
     jeq $4, $0, end         # if next.val == 0, end
     jr $2                   # else, curr = next
