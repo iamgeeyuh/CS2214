@@ -3,10 +3,10 @@ main:
 loop:
     lw $3, 0($2)            # $3 = curr.val
     add $1, $1, $3          # $1 += $3
-    addi $2, $2, 1          # $2 = next
-    lw $4, 0($2)            # $4 = next.val
-    jeq $4, $0, end         # if next.val == 0, end
-    jr $2                   # else, curr = next
+    lw $3, 1($2)            # $3 = next
+    jeq $3, $0, end         # if next == 0, end
+    add $2, $0, $3          # $2 = curr = next   
+    j loop     
 end:
     halt
 chain4:
