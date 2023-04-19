@@ -1,0 +1,60 @@
+2. (100 * 4ns + 2 * 40ns) / 100 = 4.8ns
+
+3. Using write-through policy, each processor will write to main memory when it writes. However, this can cause traffic and slower runtime if multiple processors write at the same time and clog up the memory bus. This can be solved using a buffer that would stagger the rate at which write operations are sent to main memory by carpooling. Rather than send one write operation at a time, the buffer would send multiple. Using write-back policy would lead to data inconsistency because different buffers could change the values at the address but not notify each other because the change is stored in their local cache rather than main memory. This can be solved by allowing the processors to communicate with each other. Which one processor updates a block, other processors with that same block saved in cache must evict it. This ensures that the next time these processors access the block, they are forced to get the updated version from main memory.
+
+4. a. L1: index bits = log2(512KB / 512B) 
+                     = log2(1024) 
+                     = 10bits
+          tag bits = 64bits - 10bits - 9bits 
+                   = 45bits
+      L2: index bits = log2(4MB / 512B) 
+                     = log2(8192) 
+                     = 13bits
+          tag bits = 64bits - 13bits - 9bits 
+                   = 42bits
+
+   b. L1: block storage = 512KB 
+          valid bits = 512KB / 512B / 8 = 1KB
+          number of blocks = 512KB / 512B = 1024
+          tag bits = 45bits * 1024 = 46080 bits
+          512KB + 1KB + 46080bits = 551936 bits
+      L2: block storage = 4MB 
+          valid bits = 4MB / 512B / 8 = 8KB
+          number of blocks = 4MB / 512B = 8192
+          tag bits = 42bits * 8192 = 344064bits
+          512KB + 1KB + 344064bits = 4364288 bits
+
+   c. 0.05*3(10+ 1/3)n + 0.03*3(100+1/3) + 0.92 = 11.5
+
+5. a.      addr    | 40h | 47h | 50h | 42h | 81h | 83h | 85h | 57h | 46h
+      -------------------------------------------------------------------
+       H, M, or ME |  M  |  M  |  M  |  H  |  ME |  H  |  ME |  M  |  ME 
+      -------------------------------------------------------------------
+        Hit ratio  | 2/9
+
+   b.      addr    | 40h | 47h | 50h | 42h | 81h | 83h | 85h | 57h | 46h
+      -------------------------------------------------------------------
+       H, M, or ME |  M  |  M  |  M  |  H  |  M  |  H  |  M  |  M  |  H   
+      -------------------------------------------------------------------
+        Hit ratio  | 3/9
+
+   c.      addr    | 40h | 47h | 50h | 42h | 81h | 83h | 85h | 57h | 46h
+      -------------------------------------------------------------------
+       H, M, or ME |  M  |  H  |  M  |  H  |  ME |  H  |  H  |  H  |  ME 
+      -------------------------------------------------------------------
+        Hit ratio  | 5/9
+
+   d.      addr    | 40h | 47h | 50h | 42h | 81h | 83h | 85h | 57h | 46h
+      -------------------------------------------------------------------
+       H, M, or ME |  M  |  H  |  M  |  H  |  ME |  H  |  H  |  ME |  ME 
+      -------------------------------------------------------------------
+        Hit ratio  | 4/9
+
+6.  Addr | L1 tag | L1 h/m | L2 row | L2 tag | L2 h/m 
+   ---------------------------------------------------
+     53  |   13   |    m   |   0    |   3    |   m   
+     50  |   12   |    m   |   0    |   3    |   h  
+     52  |   13   |    h   |        |        |   
+     40  |   10   |    m   |   1    |   2    |   m
+     60  |   15   |    m   |   1    |   3    |   m
+     52  |   13   |    m   |   0    |   3    |   h

@@ -1,0 +1,306 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <bitset>
+#include <iomanip>
+using namespace std;
+
+// initial RAM, PC, and registers
+
+uint16_t ram[8192];
+uint16_t pc = 0;
+uint16_t reg[8] = {0};
+
+// opcode values
+
+const int op_add = 0;
+const int op_sub = 1;
+const int op_or = 2;
+const int op_and = 3;
+const int op_slt = 4;
+const int op_jr = 5;
+
+const int op_slti = 6;
+const int op_lw = 7;
+const int op_sw = 8;
+const int op_jeq = 9;
+const int op_addi = 10;
+
+const int op_j = 11;
+const int op_jal = 12;
+
+// arguments
+
+int rgA;
+int rgB;
+int rgC;
+uint16_t imm;
+
+void load_code(const string& filename);
+int decode(uint16_t code);
+int execute(int op);
+void output();
+
+int main(int argc, char *argv[])
+{
+    bool halt = false;
+    int op;
+    uint16_t code;
+    int mem;
+    int pc_inc;
+
+    load_code(argv[1]);
+
+    while (!halt)
+    {
+        // current memory pointer = 13 least sig bits of pc
+        mem = pc & 0b1111111111111;
+        code = ram[mem];
+        // assign opcode and appropriate arguments
+        op = decode(code);
+        // stop program when j jumps to current memory pointer AKA halt
+        if (op == op_j && mem == imm)
+        {
+            halt = true;
+        }
+        // get pc_inc and perform appropriate tasks based on opcode
+        pc_inc = execute(op);
+        pc += pc_inc;
+    }
+    output();
+}
+
+/**
+Loads a binary code file into RAM.
+
+@param filename A string representing the filename of the binary code file to be loaded.
+@return void
+
+The function opens the specified file, reads the instructions in binary format, and stores them in RAM starting at address 0.
+If the file does not contain enough instructions to fill up all of RAM, the remaining RAM is initialized to 0.
+*/
+void load_code(const string& filename)
+{
+    string line;
+    ifstream file(filename);
+    // add all instructions to ram starting at ram[0]. remaining ram is 0
+    for (int i = 0; i < 8192; i++)
+    {
+        if (getline(file, line))
+        {
+            int start = line.find('b') + 1;
+            ram[i] = static_cast<uint16_t>(stoul(line.substr(start, 16), nullptr, 2));
+        }
+        else
+        {
+            ram[i] = 0;
+        }
+    }
+    file.close();
+}
+
+/**
+Decodes a 16-bit binary instruction code and returns the corresponding opcode.
+
+@param code An unsigned 16-bit integer representing the binary instruction code to be decoded.
+@return An integer representing the corresponding opcode for the given binary instruction code.
+
+The function decodes the given binary instruction code and returns the corresponding opcode as an integer.
+The function extracts various fields from the binary instruction code, including the opcode and up to three registers and an immediate value (if applicable).
+The function also performs sign-extension on any 7-bit immediate values, extending them to 16 bits.
+The function returns the corresponding opcode as an integer value. 
+*/
+int decode(uint16_t code)
+{
+    // default 7bit imm sign-extended to 16bit
+    imm = code & 0b1111111;
+    if (imm & 0b1000000)
+    {
+        imm = imm | 0b1111111110000000;
+    }
+    rgB = (code >> 7) & 0b111;
+    rgA = (code >> 10) & 0b111;
+    switch ((code >> 13) & 0b111)
+    {
+    // opcode in least sig 4 bits
+    case (0):
+        // 3 arguments
+        rgC = (code >> 4) & 0b111;
+        switch (code & 0b1111)
+        {
+        case (0):
+            return op_add;
+        case (1):
+            return op_sub;
+        case (2):
+            return op_or;
+        case (3):
+            return op_and;
+        case (4):
+            return op_slt;
+        case (8):
+            if (((code >> 4) & 0b111111) == 0)
+            {
+                return op_jr;
+            }
+        }
+    // opcode in most sig 3 bits
+    case (1):
+        return op_addi;
+    case (2):
+        // 13bit imm
+        imm = code & 0b1111111111111;
+        return op_j;
+    case (3):
+        // 13bit imm
+        imm = code & 0b1111111111111;
+        return op_jal;
+    case (4):
+        return op_lw;
+    case (5):
+        return op_sw;
+    case (6):
+        return op_jeq;
+    case (7):
+        return op_slti;
+    }
+    return -1;
+}
+
+/**
+Executes an instruction given by its opcode and any required arguments.
+
+@param op An integer representing the opcode of the instruction to be executed.
+@return An integer representing the amount by which the program counter should be incremented after executing the instruction.
+
+The function executes the instruction corresponding to the given opcode with any required arguments, updating the state of the registers and RAM as necessary.
+The function returns an integer representing the amount by which the program counter should be incremented after executing the instruction.
+This value is usually 1, but may be different for certain instructions that modify the program counter directly.
+*/
+int execute(int op)
+{
+    switch (op)
+    {
+    // if value is stored in a register, only execute if that register is not 0
+    case (op_add):
+        if (rgC != 0)
+        {
+            reg[rgC] = reg[rgA] + reg[rgB];
+        }
+        break;
+    case (op_sub):
+        if (rgC != 0)
+        {
+            reg[rgC] = reg[rgA] - reg[rgB];
+        }
+        break;
+    case (op_or):
+        if (rgC != 0)
+        {
+            reg[rgC] = reg[rgA] | reg[rgB];
+        }
+        break;
+    case (op_and):
+        if (rgC != 0)
+        {
+            reg[rgC] = reg[rgA] & reg[rgB];
+        }
+        break;
+    case (op_slt):
+        if (rgC != 0)
+        {
+            reg[rgC] = reg[rgA] < reg[rgB];
+        }
+        break;
+    case (op_jr):
+        // sets pc as reg[rgA] and adds 0 to pc
+        pc = (reg[rgA]);
+        return 0;
+    case (op_slti):
+        if (rgB != 0)
+        {
+            reg[rgB] = reg[rgA] < imm;
+        }
+        break;
+    case (op_lw):
+        if (rgB != 0)
+        {
+            reg[rgB] = ram[(reg[rgA] + imm) & 0b1111111111111];
+        }
+        break;
+    case (op_sw):
+        ram[(imm + reg[rgA]) & 0b1111111111111] = reg[rgB];
+        break;
+    case (op_jeq):
+        if (reg[rgA] == reg[rgB])
+        {
+            // pc_inc = imm + 1
+            return (imm + 1);
+        }
+        break;
+    case (op_addi):
+        if (rgB != 0)
+        {
+            reg[rgB] = imm + reg[rgA];
+        }
+        break;
+    case (op_j):
+        pc = imm;
+        return 0;
+    case (op_jal):
+        reg[7] = pc + 1;
+        pc = imm;
+        return 0;
+    }
+    // default pc_inc is 1
+    return 1;
+}
+
+/**
+
+Outputs the final state of the simulator.
+
+@param None
+@return void
+
+The function outputs the final state of the simulator, including the final values of the program counter, registers, and RAM.
+The function does not modify the state of the simulator and does not return any value.
+*/
+void output()
+{
+    int pc_output = 0;
+
+    // Open the output file stream and check for errors
+    ofstream outfile("C:\\Users\\Jia\\Desktop\\cs2214\\project\\output.txt");
+    if (!outfile)
+    {
+        cerr << "Error: Unable to open output file!" << endl;
+        exit(1);
+    }
+
+    outfile << "Final state:" << endl;
+    outfile << "\tpc=" << setw(5) << setfill(' ') << pc << endl;
+    for (int i = 0; i < 8; i++)
+    {
+        outfile << "\t$" << i << "=" << setw(5) << setfill(' ') << reg[i] << endl;
+    }
+    // output 8 memory pointers in 16 rows for a total of 128
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            outfile << hex << setw(4) << setfill('0') << ram[pc_output] << " ";
+            pc_output++;
+        }
+        outfile << endl;
+    }
+
+    // Close the output file stream
+    outfile.close();
+}
+
+
+
+
+
+
