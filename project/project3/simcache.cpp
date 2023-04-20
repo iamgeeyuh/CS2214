@@ -36,13 +36,13 @@ int rgB;
 int rgC;
 uint16_t imm;
 
+// cache
 
+bool justL1;
 
-void load_code(const string& filename);
+void load_code(const string &filename);
 int decode(uint16_t code);
 int execute(int op);
-void sim_output();
-void output();
 
 int main(int argc, char *argv[])
 {
@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
     int pc_inc;
 
     load_code(argv[1]);
+
+    justL1 = argc == 6; // L1 if true, L1 and L2 if false
 
     while (!halt)
     {
@@ -70,7 +72,6 @@ int main(int argc, char *argv[])
         pc_inc = execute(op);
         pc += pc_inc;
     }
-    sim_output();
 }
 
 /**
@@ -82,7 +83,7 @@ Loads a binary code file into RAM.
 The function opens the specified file, reads the instructions in binary format, and stores them in RAM starting at address 0.
 If the file does not contain enough instructions to fill up all of RAM, the remaining RAM is initialized to 0.
 */
-void load_code(const string& filename)
+void load_code(const string &filename)
 {
     string line;
     ifstream file(filename);
@@ -111,7 +112,7 @@ Decodes a 16-bit binary instruction code and returns the corresponding opcode.
 The function decodes the given binary instruction code and returns the corresponding opcode as an integer.
 The function extracts various fields from the binary instruction code, including the opcode and up to three registers and an immediate value (if applicable).
 The function also performs sign-extension on any 7-bit immediate values, extending them to 16 bits.
-The function returns the corresponding opcode as an integer value. 
+The function returns the corresponding opcode as an integer value.
 */
 int decode(uint16_t code)
 {
@@ -258,52 +259,3 @@ int execute(int op)
     // default pc_inc is 1
     return 1;
 }
-
-/**
-
-Outputs the final state of the simulator.
-
-@param None
-@return void
-
-The function outputs the final state of the simulator, including the final values of the program counter, registers, and RAM.
-The function does not modify the state of the simulator and does not return any value.
-*/
-void sim_output()
-{
-    int pc_output = 0;
-
-    // Open the output file stream and check for errors
-    ofstream outfile("C:\\Users\\Jia\\Desktop\\cs2214\\project\\output.txt");
-    if (!outfile)
-    {
-        cerr << "Error: Unable to open output file!" << endl;
-        exit(1);
-    }
-
-    outfile << "Final state:" << endl;
-    outfile << "\tpc=" << setw(5) << setfill(' ') << pc << endl;
-    for (int i = 0; i < 8; i++)
-    {
-        outfile << "\t$" << i << "=" << setw(5) << setfill(' ') << reg[i] << endl;
-    }
-    // output 8 memory pointers in 16 rows for a total of 128
-    for (int i = 0; i < 16; i++)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            outfile << hex << setw(4) << setfill('0') << ram[pc_output] << " ";
-            pc_output++;
-        }
-        outfile << endl;
-    }
-
-    // Close the output file stream
-    outfile.close();
-}
-
-void output(){}
-
-
-
-

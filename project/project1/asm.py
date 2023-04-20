@@ -140,11 +140,9 @@ def output_machine(code):
     code: list
         A list of machine code instructions.
     """
-    with open("C:\\Users\\Jia\\Desktop\\cs2214\\project\\test.bin", "wb") as f:
-        for i in range(len(code)):
-            # ram[i] = 16'b code[i] ;
-            f.write(bytes("ram[{}] = 16'b{};\n".format(i, code[i]), "utf-8"))
-            # print("ram[{}] = 16'b{};".format(i, code[i]))
+    for i in range(len(code)):
+        # ram[i] = 16'b code[i] ;
+        print("ram[{}] = 16'b{};".format(i, code[i]))
 
 
 
