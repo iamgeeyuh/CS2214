@@ -36,9 +36,12 @@ int rgB;
 int rgC;
 uint16_t imm;
 
+
+
 void load_code(const string& filename);
 int decode(uint16_t code);
 int execute(int op);
+void sim_output();
 void output();
 
 int main(int argc, char *argv[])
@@ -67,7 +70,7 @@ int main(int argc, char *argv[])
         pc_inc = execute(op);
         pc += pc_inc;
     }
-    output();
+    sim_output();
 }
 
 /**
@@ -266,7 +269,7 @@ Outputs the final state of the simulator.
 The function outputs the final state of the simulator, including the final values of the program counter, registers, and RAM.
 The function does not modify the state of the simulator and does not return any value.
 */
-void output()
+void sim_output()
 {
     int pc_output = 0;
 
@@ -299,7 +302,7 @@ void output()
     outfile.close();
 }
 
-
+void output(){}
 
 
 
