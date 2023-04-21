@@ -38,9 +38,9 @@ uint16_t imm;
 
 // cache
 
-bool justL1;
 
 void load_code(const string &filename);
+void load_cache(const string &arg, int cache);
 int decode(uint16_t code);
 int execute(int op);
 
@@ -51,10 +51,13 @@ int main(int argc, char *argv[])
     uint16_t code;
     int mem;
     int pc_inc;
+    string cache_arg = argv[3];
 
     load_code(argv[1]);
-
-    justL1 = argc == 6; // L1 if true, L1 and L2 if false
+    load_cache(cache_arg.substr(0, 5), 1);
+    if (cache_arg.size() != 5){
+        load_cache(cache_arg.substr(6, 5), 2);
+    }
 
     while (!halt)
     {
@@ -258,4 +261,8 @@ int execute(int op)
     }
     // default pc_inc is 1
     return 1;
+}
+
+void load_cache(const string &arg, int cache){
+    cout << "Cache L" << cache << " has size " << arg[0] << ", associativity " << arg[2] << ", blocksize " << arg[4] << ", rows " << (arg[0] - '0') / ((arg[2] - '0') * (arg[4] - '0')) << endl;
 }
