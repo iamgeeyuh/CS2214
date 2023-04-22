@@ -1,9 +1,155 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <bitset>
 #include <iomanip>
 using namespace std;
+
+// cache classes
+
+class Block
+{
+public:
+    Block() : valid(false) {}
+
+    Block(int blocksize, int tag, int used) : values(blocksize), tag(tag), used(used), valid(true) {}
+
+    // getters
+    bool is_valid() const { return valid; }
+    int get_tag() const { return tag; }
+    vector<uint16_t> &get_values() const { return values; }
+    int get_used() const { return used; }
+
+    void set_used(int new_used) { used = new_used; }
+
+private:
+    bool valid;
+    int tag;
+    int used;
+    vector<uint16_t> values;
+};
+class Cache
+{
+    friend ostream &operator<<(ostream &os, const Cache &cache)
+    {
+        os << "Cache " << cache.name << " has size " << cache.size << ", associativity " << cache.associativity << ", blocksize " << cache.blocksize << ", rows " << cache.num_rows << endl;
+
+        return os;
+    }
+
+public:
+    Cache(const string &name) : name(name), exists(false) {}
+
+    Cache(const string &name, int size, int associativity, int blocksize) : name(name), size(size), associativity(associativity), blocksize(blocksize), num_rows(size / (associativity * blocksize)), exists(true), recently_used(num_rows, 0)
+    {
+        row.resize(num_rows);
+        for (int i = 0; i < num_rows; i++)
+        {
+            row[i].resize(associativity);
+        }
+    }
+
+    // getters
+    const string &get_name() const { return name; }
+    bool get_exists() const { return exists; }
+
+    int least_recent(int index)
+    {
+        for (int i = 0; i < row[index].size(); i++)
+        {
+            if (row[index][i].get_used() == recently_used[index]){
+                replace_block(row[index][i].get_values)
+            }
+        }
+    }
+
+    void replace_block(vector<uint16_t> &old_block, const vector<uint16_t> &new_block)
+    {
+        for (int i = 0; i < old_block.size(); i++)
+        {
+            old_block[i] = new_block[i];
+        }
+    }
+
+    const vector<uint16_t> &read_ram(int block_id)
+    {
+        int start = block_id << blocksize;
+        vector<uint16_t> values;
+
+        for (int i = 0; i < blocksize; i++)
+        {
+            values[i] = ram[start + i];
+        }
+
+        return values;
+    }
+
+    const vector<uint16_t> &read_cache(int addr)
+    {
+        int block_id = addr / blocksize;
+        int row_ind = block_id / num_rows;
+        int tag = block_id / num_rows;
+
+        vector<Block> set = row[row_ind]; // selected row
+
+        int empty_ind = -1;
+
+        for (int i = 0; i < set.size(); i++)
+        {
+            if (!set[i].is_valid()) // if empty block, miss
+            {
+                empty_ind = i;
+                break;
+            }
+            else if (set[i].get_tag() == tag) // if tag matched, hit
+            {
+                print_log_entry("HIT", addr, row_ind);
+                // update most recently used
+                recently_used[row_ind] += 1;
+                set[i].set_used(recently_used[row_ind]);
+                return set[i].get_values();
+            }
+        }
+
+        vector<uint16_t> values;
+
+        print_log_entry("MISS", addr, row_ind);
+
+        if (name == "L1" && L2.get_exists())
+        {
+            // L1 reads from L2
+            values = L2.read_cache(addr);
+        }
+        else
+        {
+            // L1 or L2 reads from ram
+            values = read_ram(block_id);
+        }
+
+        if (empty_ind != -1)
+        {
+        }
+    }
+
+    void print_log_entry(const string &status, int addr, int row)
+    {
+        cout << left << setw(8) << name + " " + status << right << " pc:" << setw(5) << pc << "\taddr:" << setw(5) << addr << "\trow:" << setw(4) << row << endl;
+    }
+
+private:
+    string name;
+    int size;
+    int associativity;
+    int blocksize;
+    int num_rows;
+    bool exists;
+    vector<vector<Block>> row;
+    vector<int> recently_used;
+};
+
+Cache L1("L1");
+Cache L2("L2");
 
 // initial RAM, PC, and registers
 
@@ -36,13 +182,11 @@ int rgB;
 int rgC;
 uint16_t imm;
 
-// cache
-
-
 void load_code(const string &filename);
-void load_cache(const string &arg, int cache);
 int decode(uint16_t code);
 int execute(int op);
+
+void load_cache(const string &args);
 
 int main(int argc, char *argv[])
 {
@@ -51,13 +195,9 @@ int main(int argc, char *argv[])
     uint16_t code;
     int mem;
     int pc_inc;
-    string cache_arg = argv[3];
 
     load_code(argv[1]);
-    load_cache(cache_arg.substr(0, 5), 1);
-    if (cache_arg.size() != 5){
-        load_cache(cache_arg.substr(6, 5), 2);
-    }
+    load_cache(argv[3]);
 
     while (!halt)
     {
@@ -263,6 +403,32 @@ int execute(int op)
     return 1;
 }
 
-void load_cache(const string &arg, int cache){
-    cout << "Cache L" << cache << " has size " << arg[0] << ", associativity " << arg[2] << ", blocksize " << arg[4] << ", rows " << (arg[0] - '0') / ((arg[2] - '0') * (arg[4] - '0')) << endl;
+void load_cache(const string &args)
+{
+    vector<int> int_args;
+    int curr_arg = 0;
+
+    // add value to curr_arg until ',' is found. then push curr_arg to int_args
+    for (int i = 0; i < args.size(); i++)
+    {
+        if (args[i] == ',')
+        {
+            int_args.push_back(curr_arg);
+            curr_arg = 0;
+        }
+        else
+        {
+            curr_arg = curr_arg * 10 + (args[i] - '0');
+        }
+    }
+    int_args.push_back(curr_arg);
+
+    // redefine L1 and L2
+    L1 = Cache("L1", int_args[0], int_args[1], int_args[2]);
+    cout << L1;
+    if (int_args.size() == 6)
+    {
+        L2 = Cache("L2", int_args[3], int_args[4], int_args[5]);
+        cout << L2;
+    }
 }
