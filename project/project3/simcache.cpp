@@ -6,151 +6,6 @@
 #include <iomanip>
 using namespace std;
 
-// cache classes
-
-class Block
-{
-public:
-    Block() : valid(false) {}
-
-    Block(int blocksize, int tag, int used) : values(blocksize), tag(tag), used(used), valid(true) {}
-
-    // getters
-    bool is_valid() const { return valid; }
-    int get_tag() const { return tag; }
-    vector<uint16_t> &get_values() const { return values; }
-    int get_used() const { return used; }
-
-    void set_used(int new_used) { used = new_used; }
-
-private:
-    bool valid;
-    int tag;
-    int used;
-    vector<uint16_t> values;
-};
-class Cache
-{
-    friend ostream &operator<<(ostream &os, const Cache &cache)
-    {
-        os << "Cache " << cache.name << " has size " << cache.size << ", associativity " << cache.associativity << ", blocksize " << cache.blocksize << ", rows " << cache.num_rows << endl;
-
-        return os;
-    }
-
-public:
-    Cache(const string &name) : name(name), exists(false) {}
-
-    Cache(const string &name, int size, int associativity, int blocksize) : name(name), size(size), associativity(associativity), blocksize(blocksize), num_rows(size / (associativity * blocksize)), exists(true), recently_used(num_rows, 0)
-    {
-        row.resize(num_rows);
-        for (int i = 0; i < num_rows; i++)
-        {
-            row[i].resize(associativity);
-        }
-    }
-
-    // getters
-    const string &get_name() const { return name; }
-    bool get_exists() const { return exists; }
-
-    int least_recent(int index)
-    {
-        for (int i = 0; i < row[index].size(); i++)
-        {
-            if (row[index][i].get_used() == recently_used[index]){
-                replace_block(row[index][i].get_values)
-            }
-        }
-    }
-
-    void replace_block(vector<uint16_t> &old_block, const vector<uint16_t> &new_block)
-    {
-        for (int i = 0; i < old_block.size(); i++)
-        {
-            old_block[i] = new_block[i];
-        }
-    }
-
-    const vector<uint16_t> &read_ram(int block_id)
-    {
-        int start = block_id << blocksize;
-        vector<uint16_t> values;
-
-        for (int i = 0; i < blocksize; i++)
-        {
-            values[i] = ram[start + i];
-        }
-
-        return values;
-    }
-
-    const vector<uint16_t> &read_cache(int addr)
-    {
-        int block_id = addr / blocksize;
-        int row_ind = block_id / num_rows;
-        int tag = block_id / num_rows;
-
-        vector<Block> set = row[row_ind]; // selected row
-
-        int empty_ind = -1;
-
-        for (int i = 0; i < set.size(); i++)
-        {
-            if (!set[i].is_valid()) // if empty block, miss
-            {
-                empty_ind = i;
-                break;
-            }
-            else if (set[i].get_tag() == tag) // if tag matched, hit
-            {
-                print_log_entry("HIT", addr, row_ind);
-                // update most recently used
-                recently_used[row_ind] += 1;
-                set[i].set_used(recently_used[row_ind]);
-                return set[i].get_values();
-            }
-        }
-
-        vector<uint16_t> values;
-
-        print_log_entry("MISS", addr, row_ind);
-
-        if (name == "L1" && L2.get_exists())
-        {
-            // L1 reads from L2
-            values = L2.read_cache(addr);
-        }
-        else
-        {
-            // L1 or L2 reads from ram
-            values = read_ram(block_id);
-        }
-
-        if (empty_ind != -1)
-        {
-        }
-    }
-
-    void print_log_entry(const string &status, int addr, int row)
-    {
-        cout << left << setw(8) << name + " " + status << right << " pc:" << setw(5) << pc << "\taddr:" << setw(5) << addr << "\trow:" << setw(4) << row << endl;
-    }
-
-private:
-    string name;
-    int size;
-    int associativity;
-    int blocksize;
-    int num_rows;
-    bool exists;
-    vector<vector<Block>> row;
-    vector<int> recently_used;
-};
-
-Cache L1("L1");
-Cache L2("L2");
-
 // initial RAM, PC, and registers
 
 uint16_t ram[8192];
@@ -182,9 +37,192 @@ int rgB;
 int rgC;
 uint16_t imm;
 
+// cache classes
+
+class Block
+{
+
+public:
+    Block() : valid(false) {}
+
+    Block(int tag, int used) : tag(tag), used(used), valid(true)
+    {
+    }
+
+    // getters
+    bool is_valid() const { return valid; }
+    int get_tag() const { return tag; }
+    int get_used() const { return used; }
+
+    void set_used(int new_used) { used = new_used; }
+    void set_tag(int new_tag) { tag = new_tag; }
+
+private:
+    bool valid;
+    int tag;
+    int used;
+};
+
+class Cache
+{
+    friend ostream &operator<<(ostream &os, const Cache &cache)
+    {
+        os << "Cache " << cache.name << " has size " << cache.size << ", associativity " << cache.associativity << ", blocksize " << cache.blocksize << ", rows " << cache.num_rows << endl;
+
+        return os;
+    }
+
+public:
+    Cache(const string &name) : name(name), exists(false) {}
+
+    Cache(const string &name, int size, int associativity, int blocksize) : name(name), size(size), associativity(associativity), blocksize(blocksize), num_rows(size / (associativity * blocksize)), exists(true), recently_used(num_rows, 0)
+    {
+        row.resize(num_rows);
+        for (int i = 0; i < num_rows; i++)
+        {
+            row[i].resize(associativity);
+        }
+    }
+
+    // getters
+    const string &get_name() const { return name; }
+    bool get_exists() const { return exists; }
+
+    void read_cache(int addr, Cache &L2)
+    {
+        int block_id = addr / blocksize;
+        int row_ind = block_id % num_rows;
+        int tag = block_id / num_rows;
+
+        vector<Block> &set = row[row_ind]; // selected row
+
+        int empty_ind = -1;
+
+        recently_used[row_ind] += 1;
+
+        for (int i = 0; i < set.size(); i++)
+        {
+            if (!set[i].is_valid()) // if empty block, miss
+            {
+                empty_ind = i;
+                break;
+            }
+            else if (set[i].get_tag() == tag) // if tag matched, hit
+            {
+                print_log_entry("HIT", addr, row_ind);
+                // update most recently used
+                set[i].set_used(recently_used[row_ind]);
+                return;
+            }
+        }
+
+        print_log_entry("MISS", addr, row_ind);
+
+        if (name == "L1" && L2.get_exists())
+        {
+            // get values from L2
+            L2.read_cache(addr, L2);
+        }
+
+        if (empty_ind != -1)
+        {
+            // first encountered empty block
+            set[empty_ind] = Block(tag, recently_used[row_ind]);
+        }
+        else
+        {
+            // find least recently used block
+            int least = set[0].get_used();
+            int least_ind = 0;
+
+            for (int i = 0; i < set.size(); i++)
+            {
+                if (set[i].get_used() < least)
+                {
+                    least = set[i].get_used();
+                    least_ind = i;
+                }
+            }
+            set[least_ind].set_tag(tag);
+            set[least_ind].set_used(recently_used[row_ind]);
+        }
+    }
+
+    void write_cache(int addr, Cache &L2)
+    {
+        int block_id = addr / blocksize;
+        int row_ind = block_id % num_rows;
+        int tag = block_id / num_rows;
+
+        vector<Block> &set = row[row_ind]; // selected row
+
+        recently_used[row_ind] += 1;
+
+        print_log_entry("SW", addr, row_ind);
+
+        bool hit = false;
+
+        for (int i = 0; i < set.size(); i++)
+        {
+            if (!set[i].is_valid()) // if empty block, write
+            {
+                set[i] = Block(tag, recently_used[row_ind]);
+                hit = true;
+                break;
+            }
+        }
+        if (name == "L1" && L2.get_exists())
+        {
+
+            L2.write_cache(addr, L2);
+        }
+
+        if (!hit)
+        {
+            // find least recently used block
+            int least = set[0].get_used();
+            int least_ind = 0;
+
+            for (int i = 0; i < set.size(); i++)
+            {
+                if (set[i].get_used() < least)
+                {
+                    least = set[i].get_used();
+                    least_ind = i;
+                }
+            }
+            set[least_ind].set_tag(tag);
+            set[least_ind].set_used(recently_used[row_ind]);
+        }
+    }
+
+    void print_log_entry(const string &status, int addr, int row)
+    {
+        cout << left << setw(8) << name + " " + status << right << " pc:" << setw(5) << pc << "\taddr:" << setw(5) << addr << "\trow:" << setw(4) << row << endl;
+    }
+
+private:
+    string name;
+    int size;
+    int associativity;
+    int blocksize;
+    int num_rows;
+    bool exists;
+    vector<vector<Block>> row;
+    vector<int> recently_used; // stores order of block access
+};
+
+Cache L1("L1");
+Cache L2("L2");
+
+// sim functions
+
 void load_code(const string &filename);
 int decode(uint16_t code);
 int execute(int op);
+void output();
+
+// cache functions
 
 void load_cache(const string &args);
 
@@ -215,6 +253,7 @@ int main(int argc, char *argv[])
         pc_inc = execute(op);
         pc += pc_inc;
     }
+    // output();
 }
 
 /**
@@ -370,12 +409,14 @@ int execute(int op)
         }
         break;
     case (op_lw):
+        L1.read_cache((reg[rgA] + imm) & 0b1111111111111, L2);
         if (rgB != 0)
         {
             reg[rgB] = ram[(reg[rgA] + imm) & 0b1111111111111];
         }
         break;
     case (op_sw):
+        L1.write_cache((reg[rgA] + imm) & 0b1111111111111, L2);
         ram[(imm + reg[rgA]) & 0b1111111111111] = reg[rgB];
         break;
     case (op_jeq):
@@ -430,5 +471,26 @@ void load_cache(const string &args)
     {
         L2 = Cache("L2", int_args[3], int_args[4], int_args[5]);
         cout << L2;
+    }
+}
+
+void output()
+{
+    int pc_output = 0;
+    cout << "Final state:" << endl;
+    cout << "\tpc=" << setw(5) << setfill(' ') << pc << endl;
+    for (int i = 0; i < 8; i++)
+    {
+        cout << "\t$" << i << "=" << setw(5) << setfill(' ') << reg[i] << endl;
+    }
+    // output 8 memory pointers in 16 rows for a total of 128
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            cout << hex << setw(4) << setfill('0') << ram[pc_output] << " ";
+            pc_output++;
+        }
+        cout << endl;
     }
 }
