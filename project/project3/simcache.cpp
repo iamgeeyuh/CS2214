@@ -39,6 +39,11 @@ uint16_t imm;
 
 // cache classes
 
+/**
+ * Implementation of Blocks of memory inside cache.
+ *
+ * Each Block is given a tag and used value. The greater its used value, the more recently its been accessed. Its tag is used to identify it.
+ */
 class Block
 {
 
@@ -54,6 +59,7 @@ public:
     int get_tag() const { return tag; }
     int get_used() const { return used; }
 
+    // setters
     void set_used(int new_used) { used = new_used; }
     void set_tag(int new_tag) { tag = new_tag; }
 
@@ -62,6 +68,12 @@ private:
     int tag;
     int used;
 };
+
+/**
+ * Implementation of cache
+ *
+ * Cache holds a vector of Block objects and a vector that keeps track of the rank of each Block object. The rank is the most recent time a Block has been accessed. Cache is constructed with a name, size, associativity, and blocksize. The size, associativity, and blocksize determines its rows and the size of its vectors of Block objects. Cache supports reading and writing to another cache or ram.
+ */
 
 class Cache
 {
@@ -90,6 +102,22 @@ public:
 
     void read_cache(int addr, Cache &L2)
     {
+        /**
+         * Reads a value from the cache given a memory address.
+         *
+         * @param addr An integer memory address
+         * @param L2 A reference to a Cache object representing the L2 cache
+         *
+         * @return void
+         *
+         * The method checks if the specified address has been stored in the cache.
+         * If it has, the method prints "Hit" and returns. If not, it checks if the
+         * cache is L1 or L2. If the cache is L1 and L2 exists, the method calls
+         * L2.read_cache(). If not, the method reads from RAM. It then searches for an
+         * empty or least recently used block and replaces it with the newly retrieved
+         * block of information.
+         */
+
         int block_id = addr / blocksize;
         int row_ind = block_id % num_rows;
         int tag = block_id / num_rows;
@@ -150,6 +178,15 @@ public:
 
     void write_cache(int addr, Cache &L2)
     {
+        /**
+        Writes value to cache.
+
+        @param an integer memory address
+        @param a reference to cache L2
+        @return void
+
+        The method writes the value to the cache by first searching for an empty block, and if there is no empty block, then it looks for the least recently used block to replace with the new block of information. If the cache is L1 and L2 exists, then call L2.write_cache. If not, then write to ram.
+        */
         int block_id = addr / blocksize;
         int row_ind = block_id % num_rows;
         int tag = block_id / num_rows;
@@ -446,6 +483,15 @@ int execute(int op)
 
 void load_cache(const string &args)
 {
+    /**
+
+    Loads the cache with the specified arguments.
+
+    @param a string of comma-separated integer values specifying cache size, associativity, and block size (and for L2 cache, L2 cache size, associativity, and block size)
+    @return void
+    
+    The method takes a string argument of comma-separated integer values specifying cache size, associativity, and block size (and for L2 cache, L2 cache size, associativity, and block size). It then converts these values to integers and uses them to redefine the L1 and L2 caches. The method then prints the newly defined L1 and L2 caches.
+    */
     vector<int> int_args;
     int curr_arg = 0;
 
