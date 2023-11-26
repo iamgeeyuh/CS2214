@@ -201,7 +201,7 @@ public:
 
         for (int i = 0; i < set.size(); i++)
         {
-            if (!set[i].is_valid()) // if empty block, write
+            if (set[i].get_tag() == tag || !set[i].is_valid())
             {
                 set[i] = Block(tag, recently_used[row_ind]);
                 hit = true;
@@ -489,7 +489,7 @@ void load_cache(const string &args)
 
     @param a string of comma-separated integer values specifying cache size, associativity, and block size (and for L2 cache, L2 cache size, associativity, and block size)
     @return void
-    
+
     The method takes a string argument of comma-separated integer values specifying cache size, associativity, and block size (and for L2 cache, L2 cache size, associativity, and block size). It then converts these values to integers and uses them to redefine the L1 and L2 caches. The method then prints the newly defined L1 and L2 caches.
     */
     vector<int> int_args;
