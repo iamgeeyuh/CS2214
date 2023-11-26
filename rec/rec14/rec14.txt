@@ -1,0 +1,50 @@
+1. Endianism is the order in which bytes are stored in memory. For example, 0x1234 in big-endian would be stored with 0x12 at address 0 and 0x34 at address 1. Meanwhile in little-endian 0x34 would be stored at address 0 and 0x12 would be stored at address 1.
+
+2. a. 0x34 
+   b. 0x34
+   c. 0xc99
+   d. 0x0c
+   e. 0x00
+   f. 0x99000000
+   g. 0x0c
+   h. The address of the label numbers
+
+3. This code calculates the number of 1 bits in the binary representation of the initial value of eax. The final value of ebx will be the number of 1 bits.
+
+4. xor eax, eax
+   xor ebx, ebx
+   mov ecx, num_array
+loop:
+   mov edx, [ecx]
+   cmp edx, 0
+   je end
+   add ecx, 4
+   add eax, edx
+   cmp ebx, edx
+   jae loop
+   mov ebx, edx
+   jmp loop
+end:
+
+5. a. cmp eax, 9
+	  jg .L2
+      This compares eax to 9 and jumps if it is greater than 9. This checks for the end of the iteration because it ends when eax is greater than 9.
+
+   b. .comm i,4,4
+      .align and .size are 4
+
+   c. .comm arr,40,32
+      .align is 32 and .size is 40
+
+   d. imul, edx, edx, 100
+      This multiplied edx by 100 and stores it in edx. edx stores the values of 100
+
+   e. mov DWORD PTR arr[0+eax*4], edx
+      This stores edx, which is the value of i*100, into arr[0+eax*4], which is arr[i]
+
+   f. cmp eax, 9
+      jg .L2
+      This jumps out of the loop when eax is greater than 9
+
+   g. ret
+       

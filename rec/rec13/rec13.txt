@@ -1,0 +1,32 @@
+1. a. 0x32
+   b. 0x20
+   c. 0x0
+   d. 0x30
+   e. 0x12ab56
+   f. 0x1200ab
+   g. 0x80
+
+
+2. a. mov eax, 0x2a
+   b. add eax, 0x3e
+   c. add eax, ebx
+   d. add eax, 0x63
+      mov ebx, eax
+   e. cmp eax, ebx
+      je foo 
+   f. mov eax, [1099]
+   g. mov ecx, [foo]
+   h. mov bx, [0]
+   i. xor eax, eax
+      mov ax, [bar]
+   j. mov eax [foo]
+      mov [bar], eax
+
+3. a. 0x400
+   b. 0xaaaaeaa0
+   c. 0xaaff00
+   d. 0xab00
+   e. 0x552a0000
+
+4. eax = 0x1b5
+   ebx = 1

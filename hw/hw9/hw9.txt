@@ -1,0 +1,15 @@
+1. my_data: 56 34 12 ff 00 cd ab cd ab
+
+2. a. The program calculates the absolute difference between consecutive elements of an array. The final value of [d] is 115. It is the sum of all of the absolute differences of the consecutive elements of arr. 
+
+   b. It knows when its reached the end of the loop when cmp edx, 0 is true because the last element of arr is 0
+
+   c. The size is 2 bytes because the values are defined by dw which uses 2 bytes
+
+   d. The size is 4 bytes because it is defined by dd which uses 4 bytes
+
+   e. The size of the array is 10 bytes because it has 5 elements that are 2 bytes each
+
+   f. It checks the sign bit of eax. If eax is positive, the program proceeds. If eax is negative, it calculates the twos complement of eax which is the negation.
+
+   g. If edx is not assigned 0, its value would be unpredictable. This is bad because we are using it to accumulate all the absolute differences.
